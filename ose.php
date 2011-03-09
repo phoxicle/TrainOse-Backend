@@ -1,12 +1,20 @@
 <?php
 
+require('Logger.php');
+
+Logger::log('');
+Logger::log(date('c'));
+
 $from = $_GET['from'];
 $to = $_GET['to'];
 $noCache = $_GET['no_cache'];
 
+Logger::log('Request for route ' . $from . ' => ' . $to);
+
 // Check if already cached
 $cacheFilePath = 'cache/' . date('Ymd') .'_'. $from .'_'. $to .'.xml';
 if (!$noCache && file_exists($cacheFilePath)) {
+	Logger::log('Found cached route');
 	header('Content-type: text/xml');
 	echo file_get_contents($cacheFilePath);
 	die();
@@ -30,6 +38,9 @@ $params = array(
 );
 $additionalParams = '&trena[+]=apla&trena[+]=ic&trena[+]=ice&trena[+]=bed';
 $url = 'http://tickets.trainose.gr/dromologia/ajax.php?' . http_build_query($params) . $additionalParams;
+
+Logger::log('Retrieving route from URL: ' . $url);
+
 $jsonContents = file_get_contents($url);
 $jsonArr = json_decode($jsonContents);
 
@@ -66,6 +77,8 @@ foreach ($routes as $route) {
 		'delay' => $route->segments[0]->delay,
 	);
 }
+
+Logger::log('Retrieved ' . sizeof($routesArr) . ' routes');
 
 $routesXml = '<xml><routes>';
 foreach ($routesArr as $route) {
