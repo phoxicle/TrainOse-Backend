@@ -78,7 +78,7 @@ foreach ($routes as $route) {
 	);
 }
 
-Logger::log('Retrieved ' . sizeof($routesArr) . ' routes');
+Logger::log('Found ' . sizeof($routesArr) . ' routes');
 
 $routesXml = '<xml><routes>';
 foreach ($routesArr as $route) {
