@@ -113,54 +113,5 @@ function formatTime($time) {$m = $time;
 	return $hour . ':' . $min;
 }
 
-/*
-
-
-
-die();
-// Get page contents
-$fields = array(
-    'from' => $from,
-    'to' => $to,
-    'hour_from' => '-',
-    'hour_to' => '-',
-    'send' => '1',
-    'submitform' => 'Αναζήτηση',
-);
-$html = http_post_fields("http://www.trainose.com/content/wizards", $fields);
- 
- // Create DOM object
-$doc = new DOMDocument();
-$doc->preserveWhiteSpace = false;
-$doc->resolveExternals = true;
-@$doc->loadHTML($html);
- 
- // Retrieve the TRs in question
-$xpath = new DOMXPath($doc);
-$rows = $xpath->query("//table [@class = 'tbl_data' ]/tr");
-
-// Create XML
-$rowNum = 0;
-$routesXml = '<xml><routes>';
-foreach ($rows as $row) {
-	if ($rowNum++ < 1) continue;
-	$td = $row->firstChild;
-	$routesXml .= '
-	<route>
-		<train>'.$td->textContent.'</train>
-		<depart>'.$td->nextSibling->textContent.'</depart>
-		<arrive>'.$td->nextSibling->nextSibling->textContent.'</arrive>
-		<duration>'.$td->nextSibling->nextSibling->nextSibling->textContent.'</duration>
-		<stops>'.$td->nextSibling->nextSibling->nextSibling->nextSibling->textContent.'</stops>
-	</route>';
-}
-$routesXml .= '</routes></xml>';
- 
-header('Content-type: text/xml');
-echo $routesXml;
-
-*/
-
-
 
 ?>
