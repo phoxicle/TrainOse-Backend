@@ -1,26 +1,31 @@
 <?php
 
+require('crackCode.php');
 require('Logger.php');
 
-Logger::log('');
-Logger::log(date('c'));
+header('Content-type: text/xml');
+
+$logEntry = array();
 
 $from = $_GET['from'];
 $to = $_GET['to'];
 $noCache = $_GET['no_cache'];
 
-Logger::log('Request for route ' . $from . ' => ' . $to);
+$logEntry['source'] = $from;
+$logEntry['destination'] = $to;
 
 // Check if already cached
 $cacheFilePath = 'cache/' . date('Ymd') .'_'. $from .'_'. $to .'.xml';
 if (!$noCache && file_exists($cacheFilePath)) {
-	Logger::log('Found cached route');
-	header('Content-type: text/xml');
-	echo file_get_contents($cacheFilePath);
+	$data = file_get_contents($cacheFilePath);
+	
+	$logEntry['cached'] = 1;
+	$logEntry['data'] = $data;
+	logEntry($logEntry);
+	
+	echo $data;
 	die();
 }
-
-require('crackCode.php');
 
 $params = array(
 	'lang' => 'gr',
@@ -39,7 +44,7 @@ $params = array(
 $additionalParams = '&trena[+]=apla&trena[+]=ic&trena[+]=ice&trena[+]=bed';
 $url = 'http://tickets.trainose.gr/dromologia/ajax.php?' . http_build_query($params) . $additionalParams;
 
-Logger::log('Retrieving route from URL: ' . $url);
+$logEntry['url'] = $url;
 
 $jsonContents = file_get_contents($url);
 $jsonArr = json_decode($jsonContents);
@@ -50,23 +55,7 @@ foreach ($routes as $route) {
 	
 	//note: only take first segment
 	$trainNum = $route->segments[0]->treno;
-	if ($trainNum > 1500) { //array(1590,1592,1594,1596,1598,2590,2594,2598,3590) 
-		$train = 'ΠΡΟ'; // Ηλεκτροκίνητο
-	} else if (in_array($trainNum,array(52,53,54,55,70,71,74,75))) {
-		$train = 'IC'; // Intercity
-	} else if (in_array($trainNum,array(50,51,56,57))) {
-		$train = 'ICE';	// Intercity Express
-	} else if (in_array($trainNum,array(500,501,502,503))) {
-		$train = 'ΤΑΧ'; // Ταχεία προτεραιότητας
-	} else if (in_array($trainNum,array(604,605))) {
-		$train = 'ΜΙΚ'; //	Μικτό προτεραιότητος
-	} else if (in_array($trainNum,array(504,505))) {
-		$train = 'ΚΛΙ'; // Κλινοθέσιο
-	} else if (in_array($trainNum,array(592))) {
-		$train = 'ΑΠΛ'; // Κοινή αμαξοστοιχία
-	} else {
-		$train = '';	
-	}
+	$train = determineTrainType($trainNum);
 
 	$routesArr[] = array(
 		'duration' => $route->ttt,
@@ -78,7 +67,9 @@ foreach ($routes as $route) {
 	);
 }
 
-Logger::log('Found ' . sizeof($routesArr) . ' routes');
+$numRoutes = sizeof($routesArr);
+$logEntry['numRoutes'] = $numRoutes;
+$logEntry['severity'] = $numRoutes == 0 ? 1 : 0; // possible error if no routes
 
 $routesXml = '<xml><routes>';
 foreach ($routesArr as $route) {
@@ -96,21 +87,54 @@ foreach ($routesArr as $route) {
 }
 $routesXml .= '</routes></xml>';
 
+$logEntry['data'] = $routesXml;
+
 // Cache result
 $fh = fopen($cacheFilePath, 'w');
 fwrite($fh, $routesXml);
 fclose($fh);
 
-// Return XML
-header('Content-type: text/xml');
-echo $routesXml;
+logEntry($logEntry);
 
+// Return XML
+echo $routesXml;
+die();
+//EOF
 
 function formatTime($time) {$m = $time;
 	list($hour,$min) = explode('.',$time);
 	while (strlen($hour) < 2) $hour = '0' . $hour;
 	while (strlen($min) < 2) $min = $min . '0';
 	return $hour . ':' . $min;
+}
+
+function logEntry($logEntry) {
+	return Logger::logToDatabase($logEntry['source'],$logEntry['destination'],$logEntry['numRoutes'],
+			$logEntry['cached'],$logEntry['data'],$logEntry['url'],$logEntry['severity']);
+}
+
+function determineTrainType($trainNum) {
+	$train = '';
+	
+	if ($trainNum > 1500) { //array(1590,1592,1594,1596,1598,2590,2594,2598,3590) 
+		$train = 'ΠΡΟ'; // Ηλεκτροκίνητο
+	} else if (in_array($trainNum,array(52,53,54,55,70,71,74,75))) {
+		$train = 'IC'; // Intercity
+	} else if (in_array($trainNum,array(50,51,56,57))) {
+		$train = 'ICE';	// Intercity Express
+	} else if (in_array($trainNum,array(500,501,502,503))) {
+		$train = 'ΤΑΧ'; // Ταχεία προτεραιότητας
+	} else if (in_array($trainNum,array(604,605))) {
+		$train = 'ΜΙΚ'; //	Μικτό προτεραιότητος
+	} else if (in_array($trainNum,array(504,505))) {
+		$train = 'ΚΛΙ'; // Κλινοθέσιο
+	} else if (in_array($trainNum,array(592))) {
+		$train = 'ΑΠΛ'; // Κοινή αμαξοστοιχία
+	} else {
+		$train = '';
+	}
+	
+	return $train;
 }
 
 

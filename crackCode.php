@@ -21,4 +21,3 @@ foreach ($trainData as $station) {
 
 
 ?>
-

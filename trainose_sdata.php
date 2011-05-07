@@ -1,4 +1,3 @@
-
 <?php
 // Obtain by copying object, call JSON.stringify, copy output
 $sta8moi = '
