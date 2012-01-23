@@ -116,19 +116,21 @@ function logEntry($logEntry) {
 function determineTrainType($trainNum) {
 	$train = '';
 	
-	if ($trainNum > 1500) { //array(1590,1592,1594,1596,1598,2590,2594,2598,3590) 
+	if (($trainNum > 1530 && $trainNum < 1560) || ($trainNum > 1680 && $trainNum < 1690) || ($trainNum > 2530 && $trainNum < 2560)) {
+		$train = 'ΑΠΛ'; // Κοινή αμαξοστοιχία
+	} else if (($trainNum > 1560 && $trainNum < 2530) || $trainNum > 2560 && $trainNum < 4300 ) { //array(1590,1592,1594,1596,1598,2590,2594,2598,3590)
 		$train = 'ΠΡΟ'; // Ηλεκτροκίνητο
-	} else if (in_array($trainNum,array(52,53,54,55,70,71,74,75))) {
+	} else if ( ($trainNum >= 610 && $trainNum < 620 || ($trainNum > 880 && $trainNum < 890) || $trainNum >= 4300 ) {
+		$train = 'DES'; // (need to translate, don't know what it is yet)
+	} else if (in_array($trainNum,array(50,51,52,53,54,55,56,57,58,59,60,61,70,71,74,75,90,91))) {
 		$train = 'IC'; // Intercity
-	} else if (in_array($trainNum,array(50,51,56,57))) {
-		$train = 'ICE';	// Intercity Express
 	} else if (in_array($trainNum,array(500,501,502,503))) {
 		$train = 'ΤΑΧ'; // Ταχεία προτεραιότητας
 	} else if (in_array($trainNum,array(604,605))) {
 		$train = 'ΜΙΚ'; //	Μικτό προτεραιότητος
 	} else if (in_array($trainNum,array(504,505))) {
-		$train = 'ΚΛΙ'; // Κλινοθέσιο
-	} else if (in_array($trainNum,array(592))) {
+		$train = 'ΚΛΙ'; // Κλινοθέσιο (έχει καταργηθεί)
+	} else if (in_array($trainNum,array(561,590,591,592))) {
 		$train = 'ΑΠΛ'; // Κοινή αμαξοστοιχία
 	} else {
 		$train = '';
