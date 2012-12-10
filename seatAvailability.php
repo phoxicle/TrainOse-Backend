@@ -1,6 +1,6 @@
 <?php
 
-//http://tickets.trainose.gr/dromologia/touch_seats.html?c=krathsh_wt&op=trip_available_seats&trip=56|ΑΘΗΝ|ΘΕΣΣ|20110210|19.29|20110210|23.55|11:&lang=gr
+// http://tickets.trainose.gr/dromologia/i.php?c=krathsh&ekpt50=0&ekpt25=0&trip=50|ΑΘΗΝ|ΘΕΣΣ|20121210|7.18|20121210|12.41
 
 $from = $_GET['from']; // Αθήνα
 $to = $_GET['to']; // Λάρισα
@@ -17,8 +17,8 @@ $arriveDate = ($depart < $arrive) ? $departDate : date('Ymd', strtotime('+1 day'
 
 $tripStr = implode('|', array($trainNum, $fromCode, $toCode, $departDate,
 		$depart, $arriveDate, $arrive));
-$targetPage = 'http://tickets.trainose.gr/dromologia/touch_seats.html?c=krathsh_wt&op=trip_available_seats&trip='
-		. urlencode($tripStr) . '&lang=gr';
+$targetPage = 'http://tickets.trainose.gr/dromologia/i.php?c=krathsh&ekpt50=0&ekpt25=0&trip='
+		. urlencode($tripStr);
 
 header('Content-Type: text/html; charset=UTF-8');
 header('Location: ' . $targetPage);
